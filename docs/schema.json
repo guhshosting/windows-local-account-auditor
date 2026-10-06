@@ -1,0 +1,31 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "windows-local-account-auditor 1.0.0",
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["schema_version", "acquisition", "view", "users", "groups", "machine_policy", "findings", "unavailable_information", "warnings"],
+ "properties": {
+  "schema_version": {"const": "1.0.0"},
+  "acquisition": {"$ref": "#/definitions/fields"},
+  "view": {"enum": ["all", "summary", "users", "groups", "policy", "user"]},
+  "users": {"type": "array", "items": {"$ref": "#/definitions/user"}},
+  "groups": {"type": "array", "items": {"$ref": "#/definitions/group"}},
+  "machine_policy": {"$ref": "#/definitions/fields"},
+  "findings": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["code", "subject", "evidence"], "properties": {"code": {"type": "string"}, "subject": {"type": "string"}, "evidence": {"type": "string"}}}},
+  "unavailable_information": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["source", "subject", "status", "win32_code"], "properties": {"source": {"type": "string"}, "subject": {"type": "string"}, "status": {"enum": ["unavailable", "inaccessible"]}, "win32_code": {"type": "integer", "minimum": 0, "maximum": 4294967295}}}},
+  "warnings": {"type": "array", "items": {"type": "string"}}
+ },
+ "definitions": {
+  "value": {
+   "type": "object", "additionalProperties": false,
+   "required": ["status", "value"],
+   "properties": {"status": {"enum": ["available", "absent", "unavailable", "inaccessible", "unknown", "not_applicable", "never", "unlimited"]}, "value": {"type": ["string", "integer", "boolean", "null"]}},
+   "if": {"properties": {"status": {"const": "available"}}},
+   "then": {"properties": {"value": {"type": ["string", "integer", "boolean"]}}},
+   "else": {"properties": {"value": {"type": "null"}}}
+  },
+  "fields": {"type": "object", "additionalProperties": {"$ref": "#/definitions/value"}},
+  "user": {"type": "object", "additionalProperties": false, "required": ["name", "fields", "local_groups"], "properties": {"name": {"type": "string"}, "fields": {"$ref": "#/definitions/fields"}, "local_groups": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}}},
+  "group": {"type": "object", "additionalProperties": false, "required": ["name", "fields", "privileged", "members"], "properties": {"name": {"type": "string"}, "fields": {"$ref": "#/definitions/fields"}, "privileged": {"$ref": "#/definitions/value"}, "members": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["sid", "name", "kind"], "properties": {"sid": {"type": "string"}, "name": {"$ref": "#/definitions/value"}, "kind": {"enum": ["local_user", "local_group", "unresolved"]}}}}}}
+ }
+}
